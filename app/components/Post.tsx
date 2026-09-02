@@ -4,6 +4,7 @@ import {
   HeartIcon,
   BookmarkIcon,
   ChatBubbleOvalLeftEllipsisIcon,
+  FaceSmileIcon,
 } from "@heroicons/react/24/outline";
 interface PostProps {
   id: string;
@@ -43,6 +44,20 @@ export default function Post({
         </div>
         <BookmarkIcon className="btn" />
       </div>
+      {/* Post Comments */}
+      <p className="text-sm p-5 truncate">
+        <span className="font-bold mr-2">{username}</span> {caption}
+      </p>
+      {/* Post Input Box */}
+      <form action="" className="flex items-center p-4">
+        <FaceSmileIcon className="h-7 cursor-pointer" />
+        <input
+          type="text"
+          placeholder="Enter your comment..."
+          className="flex-1 border-none focus:ring-0 text-sm"
+        />
+        <button className="font-bold text-blue-400">Post</button>
+      </form>
     </div>
   );
 }

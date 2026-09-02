@@ -17,7 +17,7 @@ export default function Posts() {
       userImg:
         "https://media.licdn.com/dms/image/v2/D4E03AQGEX_vk_Qc6Qg/profile-displayphoto-crop_800_800/B4EZmkzGOjGcAI-/0/1759406484294?e=1789603200&v=beta&t=txjbCCMIpHP67XrZkEdNAI8v8k-Dj_gjpCeNpBLWTuk",
       img: "https://images.unsplash.com/photo-1608634193723-1865aa4416ce?q=80&w=1171&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      caption: "Gonder castle",
+      caption: "Gonder Fasil castle",
     },
   ];
   return (
