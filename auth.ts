@@ -27,4 +27,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   pages: {
     signIn: "/auth/signin",
   },
+  callbacks: {
+    async session({ session, user }) {
+      if (session.user?.name) {
+        session.user.username = session.user.name
+          .split(" ")
+          .join("")
+          .toLocaleLowerCase();
+      }
+      session.user.uid = user.id;
+      return session;
+    },
+  },
 });
