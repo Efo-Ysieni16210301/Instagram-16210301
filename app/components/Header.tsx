@@ -12,6 +12,7 @@ import { useModalStore } from "@/store/useModalStore";
 
 export default function Header() {
   const { data: session } = useSession();
+
   const { Open, setOpen } = useModalStore();
 
   return (
