@@ -73,8 +73,9 @@ export default function UploadModal() {
       await addDoc(collection(db, "posts"), {
         uid: session.user.uid,
         username: session.user.username,
+        userImg: session.user.image, // ← added, the poster's profile picture
         caption,
-        image: imageUrl,
+        img: imageUrl, // ← renamed from "image" to "img" to match Posts.tsx
         timestamp: serverTimestamp(),
       });
 
