@@ -8,9 +8,11 @@ import {
 import { HomeIcon } from "@heroicons/react/16/solid";
 import { signIn, signOut, useSession } from "next-auth/react";
 
+import { useModalStore } from "@/store/useModalStore";
+
 export default function Header() {
   const { data: session } = useSession();
-  console.log(session);
+  const { Open, setOpen } = useModalStore();
 
   return (
     <div className="shadow-sm  sticky top-0 bg-white z-30">
@@ -51,7 +53,10 @@ export default function Header() {
 
           {session ? (
             <>
-              <PlusCircleIcon className="h-6 cursor-pointer hover:scale-125 transition-transform duration-200 ease-out" />
+              <PlusCircleIcon
+                onClick={() => setOpen(true)}
+                className="h-6 cursor-pointer hover:scale-125 transition-transform duration-200 ease-out"
+              />
               <img
                 onClick={() => signOut()}
                 src={session.user?.image ?? ""}
