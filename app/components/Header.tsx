@@ -9,11 +9,13 @@ import { HomeIcon } from "@heroicons/react/16/solid";
 import { signIn, signOut, useSession } from "next-auth/react";
 
 import { useModalStore } from "@/store/useModalStore";
+import { useRouter } from "next/navigation";
 
 export default function Header() {
   const { data: session } = useSession();
 
   const { Open, setOpen } = useModalStore();
+  const router = useRouter();
 
   return (
     <div className="shadow-sm  sticky top-0 bg-white z-30">
@@ -27,6 +29,7 @@ export default function Header() {
             priority
             className="object-contain"
             alt="instagram"
+            onClick={() => router.push("/")}
           />
         </div>
         <div className="cursor-pointer h-24 w-10 relative lg:hidden">
@@ -37,6 +40,7 @@ export default function Header() {
             priority
             className="object-contain"
             alt="instagram"
+            onClick={() => router.push("/")}
           />
         </div>
         {/* Middle */}
@@ -50,7 +54,10 @@ export default function Header() {
         </div>
         {/* Right */}
         <div className="flex space-x-4 items-center">
-          <HomeIcon className="hidden md:inline-flex h-6 cursor-pointer hover:scale-125 transition-transform duration-200 ease-out" />
+          <HomeIcon
+            onClick={() => router.push("/")}
+            className="hidden md:inline-flex h-6 cursor-pointer hover:scale-125 transition-transform duration-200 ease-out"
+          />
 
           {session ? (
             <>
