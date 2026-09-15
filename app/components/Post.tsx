@@ -146,7 +146,7 @@ export default function Post({
   return (
     <div className="bg-white my-7 border border-gray-200 rounded-md">
       {/* Post Header */}
-      <div className="flex items-center p-5">
+      <div className="flex items-center p-5 relative">
         {userImg && (
           <img
             className="h-12 rounded-full object-cover border p-1 mr-3  "
@@ -157,13 +157,13 @@ export default function Post({
         <p className="font-bold text-sm flex-1 ">{username}</p>
         <EllipsisHorizontalIcon
           onClick={() => setShowMenu((prev) => !prev)}
-          className="h-5"
+          className="h-5 cursor-pointer"
         />
         {showMenu && isOwner && (
           <div className="absolute right-5 top-12 bg-white border rounded-md shadow-lg z-10">
             <button
               onClick={deletePost}
-              className="px-4 py-2 text-sm text-red-500 hover:bg-gray-100 w-full text-left"
+              className="px-4 py-2 text-sm text-red-500 hover:bg-gray-100 w-full text-left cursor-pointer"
             >
               Delete Post
             </button>
