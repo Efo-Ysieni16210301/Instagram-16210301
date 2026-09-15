@@ -7,15 +7,19 @@ import {
   ChatBubbleOvalLeftEllipsisIcon,
   FaceSmileIcon,
 } from "@heroicons/react/24/outline";
+import { HeartIcon as HeartIconFilled } from "@heroicons/react/24/solid";
 import { useSession } from "next-auth/react";
 import {
   collection,
   addDoc,
+  setDoc,
+  deleteDoc,
   serverTimestamp,
   onSnapshot,
   query,
   orderBy,
   Timestamp,
+  doc,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
@@ -63,6 +67,10 @@ export default function Post({
   const { data: session } = useSession();
   const [comment, setComment] = useState("");
   const [comments, setComments] = useState<CommentData[]>([]);
+  const [likes, setLikes] = useState<string[]>([]);
+  const hasLiked = session?.user?.uid
+    ? likes.includes(session.user.uid)
+    : false;
 
   useEffect(() => {
     const q = query(
@@ -86,6 +94,17 @@ export default function Post({
 
     return () => unsubscribe();
   }, [id]);
+  async function likePost() {
+    if (!session?.user?.uid) return;
+    const likeRef = doc(db, "posts", id, "likes", session.user.uid);
+    if (hasLiked) {
+      await deleteDoc(likeRef);
+    } else {
+      await setDoc(likeRef, {
+        username: session.user.username,
+      });
+    }
+  }
 
   async function sendComment(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -121,12 +140,25 @@ export default function Post({
       {/* Post Buttons */}
       {session && (
         <div className="flex justify-between px-4 pt-4">
-          <div className="flex space-x-4">
-            <HeartIcon className="btn" />
+          <div className="flex space-x-4 items-center">
+            {hasLiked ? (
+              <HeartIconFilled
+                className="btn text-red-500"
+                onClick={likePost}
+              />
+            ) : (
+              <HeartIcon className="btn" onClick={likePost} />
+            )}
             <ChatBubbleOvalLeftEllipsisIcon className="btn" />
           </div>
           <BookmarkIcon className="btn" />
         </div>
+      )}
+      {/* Likes Count */}
+      {likes.length > 0 && (
+        <p className="font-bold text-sm px-5 pt-2">
+          {likes.length} {likes.length === 1 ? "like" : "likes"}
+        </p>
       )}
 
       {/* Post Caption */}
