@@ -94,6 +94,16 @@ export default function Post({
 
     return () => unsubscribe();
   }, [id]);
+  useEffect(() => {
+    const unsubscribe = onSnapshot(
+      collection(db, "posts", id, "likes"),
+      (snapshot) => {
+        setLikes(snapshot.docs.map((doc) => doc.id));
+      },
+    );
+
+    return () => unsubscribe();
+  }, [id]);
   async function likePost() {
     if (!session?.user?.uid) return;
     const likeRef = doc(db, "posts", id, "likes", session.user.uid);
