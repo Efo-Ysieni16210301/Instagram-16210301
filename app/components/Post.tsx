@@ -25,6 +25,7 @@ import { db } from "@/lib/firebase";
 
 interface PostProps {
   id: string;
+  uid: string;
   username: string;
   userImg: string;
   img: string;
@@ -59,12 +60,14 @@ function formatTimeAgo(timestamp: Timestamp | null): string {
 
 export default function Post({
   id,
+  uid,
   username,
   userImg,
   img,
   caption,
 }: PostProps) {
   const { data: session } = useSession();
+  const [showMenu, setShowMenu] = useState(false);
   const [comment, setComment] = useState("");
   const [comments, setComments] = useState<CommentData[]>([]);
   const [likes, setLikes] = useState<string[]>([]);
@@ -130,7 +133,16 @@ export default function Post({
       timestamp: serverTimestamp(),
     });
   }
-
+  const isOwner = session?.user?.uid === uid;
+  async function deletePost() {
+    if (!isOwner) return;
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this post?",
+    );
+    if (!confirmed) return;
+    await deleteDoc(doc(db, "posts", id));
+    setShowMenu(false);
+  }
   return (
     <div className="bg-white my-7 border border-gray-200 rounded-md">
       {/* Post Header */}
@@ -143,7 +155,20 @@ export default function Post({
           />
         )}
         <p className="font-bold text-sm flex-1 ">{username}</p>
-        <EllipsisHorizontalIcon className="h-5" />
+        <EllipsisHorizontalIcon
+          onClick={() => setShowMenu((prev) => !prev)}
+          className="h-5"
+        />
+        {showMenu && isOwner && (
+          <div className="absolute right-5 top-12 bg-white border rounded-md shadow-lg z-10">
+            <button
+              onClick={deletePost}
+              className="px-4 py-2 text-sm text-red-500 hover:bg-gray-100 w-full text-left"
+            >
+              Delete Post
+            </button>
+          </div>
+        )}
       </div>
       {/* Post Image */}
       {img && <img className="object-cover w-full" src={img} alt={caption} />}
@@ -202,7 +227,7 @@ export default function Post({
       {/* Post Input Box */}
       {session && (
         <form onSubmit={sendComment} className="flex items-center p-4">
-          <FaceSmileIcon className="h-7 cursor-pointer" />
+          <FaceSmileIcon className="btn" />
           <input
             value={comment}
             onChange={(e) => setComment(e.target.value)}

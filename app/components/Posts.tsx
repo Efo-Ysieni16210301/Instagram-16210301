@@ -6,6 +6,7 @@ import { db } from "@/lib/firebase";
 
 interface PostData {
   id: string;
+  uid: string;
   username: string;
   userImg: string;
   img: string;
@@ -23,6 +24,7 @@ export default function Posts() {
           const data = doc.data();
           return {
             id: doc.id,
+            uid: data.uid ?? "",
             username: data.username ?? "",
             userImg: data.userImg ?? "",
             img: data.img ?? "",
@@ -42,6 +44,7 @@ export default function Posts() {
         <Post
           key={post.id}
           id={post.id}
+          uid={post.uid}
           username={post.username}
           userImg={post.userImg}
           img={post.img}
