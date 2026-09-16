@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   EllipsisHorizontalIcon,
   HeartIcon,
@@ -7,7 +7,10 @@ import {
   ChatBubbleOvalLeftEllipsisIcon,
   FaceSmileIcon,
 } from "@heroicons/react/24/outline";
-import { HeartIcon as HeartIconFilled } from "@heroicons/react/24/solid";
+import {
+  HeartIcon as HeartIconFilled,
+  BookmarkIcon as BookmarkIconFilled,
+} from "@heroicons/react/24/solid";
 import { useSession } from "next-auth/react";
 import {
   collection,
@@ -22,6 +25,7 @@ import {
   doc,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import MessageButton from "./MessageButton";
 
 interface PostProps {
   id: string;
@@ -67,6 +71,7 @@ export default function Post({
   caption,
 }: PostProps) {
   const { data: session } = useSession();
+
   const [showMenu, setShowMenu] = useState(false);
   const [comment, setComment] = useState("");
   const [comments, setComments] = useState<CommentData[]>([]);
@@ -74,6 +79,8 @@ export default function Post({
   const hasLiked = session?.user?.uid
     ? likes.includes(session.user.uid)
     : false;
+  const [isSaved, setIsSaved] = useState(false);
+  const commentInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const q = query(
@@ -107,6 +114,30 @@ export default function Post({
 
     return () => unsubscribe();
   }, [id]);
+  useEffect(() => {
+    if (!session?.user?.uid) return;
+
+    const savedRef = doc(db, "users", session.user.uid, "saved", id);
+    const unsubscribe = onSnapshot(savedRef, (snapshot) => {
+      setIsSaved(snapshot.exists());
+    });
+
+    return () => unsubscribe();
+  }, [id, session?.user?.uid]);
+  async function toggleSave() {
+    if (!session?.user?.uid) return;
+
+    const savedRef = doc(db, "users", session.user.uid, "saved", id);
+
+    if (isSaved) {
+      await deleteDoc(savedRef);
+    } else {
+      await setDoc(savedRef, {
+        savedAt: serverTimestamp(),
+      });
+    }
+  }
+
   async function likePost() {
     if (!session?.user?.uid) return;
     const likeRef = doc(db, "posts", id, "likes", session.user.uid);
@@ -159,6 +190,13 @@ export default function Post({
           onClick={() => setShowMenu((prev) => !prev)}
           className="h-5 cursor-pointer"
         />
+        {session?.user?.uid && session.user.uid !== uid && (
+          <MessageButton
+            otherUid={uid}
+            otherName={username}
+            otherImage={userImg}
+          />
+        )}
         {showMenu && isOwner && (
           <div className="absolute right-5 top-12 bg-white border rounded-md shadow-lg z-10">
             <button
@@ -184,9 +222,24 @@ export default function Post({
             ) : (
               <HeartIcon className="btn" onClick={likePost} />
             )}
-            <ChatBubbleOvalLeftEllipsisIcon className="btn" />
+            <div className="flex items-center gap-1">
+              <ChatBubbleOvalLeftEllipsisIcon
+                onClick={() => commentInputRef.current?.focus()}
+                className="btn cursor-pointer"
+              />
+              {comments.length > 0 && (
+                <span className="text-xs text-gray-500">{comments.length}</span>
+              )}
+            </div>
           </div>
-          <BookmarkIcon className="btn" />
+          {isSaved ? (
+            <BookmarkIconFilled
+              className="btn text-blue-500"
+              onClick={toggleSave}
+            />
+          ) : (
+            <BookmarkIcon className="btn" onClick={toggleSave} />
+          )}
         </div>
       )}
       {/* Likes Count */}
@@ -229,6 +282,7 @@ export default function Post({
         <form onSubmit={sendComment} className="flex items-center p-4">
           <FaceSmileIcon className="btn" />
           <input
+            ref={commentInputRef}
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             type="text"
