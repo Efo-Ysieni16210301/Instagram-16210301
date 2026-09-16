@@ -2,6 +2,8 @@ import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import { FirestoreAdapter } from "@auth/firebase-adapter";
 import { cert } from "firebase-admin/app";
+import { getAuth } from "firebase-admin/auth";
+import { initializeApp, getApps, getApp } from "firebase-admin/app";
 
 const providers = [
   Google({
@@ -15,13 +17,20 @@ export const providerMap = providers.map((provider) => ({
   name: provider.name,
 }));
 
+const adminCredential = cert({
+  projectId: process.env.AUTH_FIREBASE_PROJECT_ID,
+  clientEmail: process.env.AUTH_FIREBASE_CLIENT_EMAIL,
+  privateKey: process.env.AUTH_FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+});
+
+// Reuse one admin app instance across the session and jwt callbacks
+const adminApp = getApps().length
+  ? getApp()
+  : initializeApp({ credential: adminCredential });
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: FirestoreAdapter({
-    credential: cert({
-      projectId: process.env.AUTH_FIREBASE_PROJECT_ID,
-      clientEmail: process.env.AUTH_FIREBASE_CLIENT_EMAIL,
-      privateKey: process.env.AUTH_FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
-    }),
+    credential: adminCredential,
   }),
   providers,
   pages: {
@@ -33,9 +42,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.username = session.user.name
           .split(" ")
           .join("")
-          .toLocaleLowerCase();
+          .toLowerCase();
       }
       session.user.uid = user.id;
+
+      // Generate a Firebase custom token so the client SDK can authenticate too
+      const firebaseToken = await getAuth(adminApp).createCustomToken(user.id);
+      session.firebaseToken = firebaseToken;
+
       return session;
     },
   },
