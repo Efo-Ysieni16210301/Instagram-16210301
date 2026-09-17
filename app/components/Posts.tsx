@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import Post from "./Post";
 import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { useSearchStore } from "@/store/useSearchStore";
 
 interface PostData {
   id: string;
@@ -15,6 +16,7 @@ interface PostData {
 
 export default function Posts() {
   const [posts, setPosts] = useState<PostData[]>([]);
+  const { searchTerm } = useSearchStore();
 
   useEffect(() => {
     const unsubscribe = onSnapshot(
@@ -38,9 +40,25 @@ export default function Posts() {
     return () => unsubscribe();
   }, []);
 
+  const filteredPosts = searchTerm.trim()
+    ? posts.filter((post) => {
+        const term = searchTerm.toLowerCase();
+        return (
+          post.username.toLowerCase().includes(term) ||
+          post.caption.toLowerCase().includes(term)
+        );
+      })
+    : posts;
+
   return (
     <div>
-      {posts.map((post) => (
+      {searchTerm.trim() && filteredPosts.length === 0 && (
+        <p className="text-center text-gray-400 mt-10">
+          No posts found for &quot;{searchTerm}&quot;
+        </p>
+      )}
+
+      {filteredPosts.map((post) => (
         <Post
           key={post.id}
           id={post.id}

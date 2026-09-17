@@ -11,7 +11,7 @@ export default function Feed() {
 
   return (
     <main
-      className={`grid ${session ? "grid-cols-1 md:grid-cols-3 md:max-w-6xl mx-auto" : "grid-cols-1 md:grid-cols-2 md:max-w-3xl mx-auto"} `}
+      className={`grid pb-16 md:pb-0 ${session ? "grid-cols-1 md:grid-cols-3 md:max-w-6xl mx-auto" : "grid-cols-1 md:grid-cols-2 md:max-w-3xl mx-auto"} `}
     >
       <section className="md:col-span-2">
         {/*Stories*/}

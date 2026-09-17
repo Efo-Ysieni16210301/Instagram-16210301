@@ -12,10 +12,13 @@ import { ChatBubbleLeftIcon } from "@heroicons/react/24/outline";
 import { useUnreadCount } from "@/lib/useUnreadCount";
 import { useModalStore } from "@/store/useModalStore";
 import { useRouter } from "next/navigation";
+import { useSearchStore } from "@/store/useSearchStore";
+import MobileMenu from "./MobileMenu";
 
 export default function Header() {
   const { data: session } = useSession();
   const unreadCount = useUnreadCount();
+  const { searchTerm, setSearchTerm } = useSearchStore();
 
   const { Open, setOpen } = useModalStore();
   const router = useRouter();
@@ -57,6 +60,8 @@ export default function Header() {
           <MagnifyingGlassIcon className="absolute top-2 left-2 h-5 text-gray-500" />
           <input
             type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search"
             className="bg-gray-50 border border-gray-500 rounded-md pl-10 pr-3 py-1.5 text-sm w-full focus:border-black focus:ring-black focus:outline-none"
           />
@@ -68,6 +73,7 @@ export default function Header() {
             onClick={() => setShowMobileSearch((prev) => !prev)}
             className="h-6 cursor-pointer sm:hidden"
           />
+          <MobileMenu />
 
           <HomeIcon
             onClick={() => router.push("/")}
@@ -114,6 +120,8 @@ export default function Header() {
           <MagnifyingGlassIcon className="absolute top-4 left-6 h-5 text-gray-500" />
           <input
             type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search"
             autoFocus
             className="bg-gray-50 border border-gray-500 rounded-md pl-10 pr-3 py-1.5 text-sm w-full focus:border-black focus:ring-black focus:outline-none"
